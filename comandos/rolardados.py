@@ -1,11 +1,11 @@
 """
-Arquivo para armazenar a categoria de comandos do
+Módulo para armazenar a categoria de comandos do
 bot relacionados a dados e rolagem de dados.
 
-Contém:
-    class Rolardados: (commands.cog)
-        Classe de cogs para a categoria rolagem de dados do DiscordBOT
-    class setup: (bot/client)
+Contém\n
+    class Rolardados: (commands.cog)\n
+        Classe de cogs para a categoria rolagem de dados do DiscordBOT\n
+    class setup: (bot/client)\n
         Classe para inicializar a cog de comandos
         'Rolar dados' no arquivo Main.py
 """
@@ -23,10 +23,11 @@ class RolarDados(commands.Cog):
     Classe de cogs para exportar hybrid commands
     da categoria de comandos 'Rolagem de dados'
 
-    1: 'rolarum' = hybrid command, faz a rolagem de um dado
-    2: 'rolar' = hybrid command, rolagem multiplos dados em uma str
-    3: 'rolarloop' = hybrid command, faz um loop da função 'rolarum'
-    4: 'sortdado' = hybrid command, sorteia um tipo de dado
+    Hybrid Commands:\n
+        rolarum = faz a rolagem de um dado\n
+        rolar = rolagem multiplos dados em uma str\n
+        rolarloop = faz um loop da função 'rolarum'\n
+        sortdado = sorteia um tipo de dado
     """
 
     def __init__(self, bot):
@@ -123,27 +124,27 @@ class RolarDados(commands.Cog):
             valor
             for valor in tipo_dados_p_rolar
             if valor not in lista_dados_validos
-        ]
+            ]
         verificar_tipos_dados = len(dados_invalidos) == 0
 
         if not verificar_tipos_dados:
             mensagem = (
                 "Um dos dados que você digitou não existe!",
                 "dados existentes: (4, 6, 8, 10, 12, 20, 100)"
-            )
+                )
             await mandar_embed(
                 contexto= ctx,
                 autor= mensagem[0],
                 desc= mensagem[1],
                 esconder= True
-            )
+                )
             return
 
         dados_sorteados = [
             randint(1, tipo_dados_p_rolar[pos])
             for pos in range(0, len(quantidades_a_rolar))
             for _ in range(0, quantidades_a_rolar[pos])
-        ]
+            ]
 
         som_quantidades = 0
         lista_organizada = []
@@ -162,7 +163,7 @@ class RolarDados(commands.Cog):
         embed = discord.Embed(
             title= mensagem_titulo,
             color= 0xdfca7f
-        )
+            )
 
         posicao = 0
         for valor in tipo_dados_p_rolar:
@@ -174,21 +175,22 @@ class RolarDados(commands.Cog):
             embed.add_field(
                 name= titulo_field,
                 value= descricao_field
-            )
+                )
 
         await ctx.send(
             embed= embed
-        )
+            )
 
     @commands.hybrid_command(
         name= "rolarloop",
         description= "Rola um amontoado de dados mais de uma vez"
-    )
+        )
     async def rolarloop(
         self, ctx, *,
         quant: int, lados: int,
         soma: int, vezes: int
-    ):
+        ):
+
         """hybrid command, faz a rolagem de um dado em loop
         Ex: Um RPG player tem 3 ações e quer atacar em todas
 
@@ -209,7 +211,7 @@ class RolarDados(commands.Cog):
                 contexto= ctx,
                 autor= mensagem,
                 esconder= True
-            )
+                )
             return
 
         dados = []
@@ -220,7 +222,7 @@ class RolarDados(commands.Cog):
             temp = [
                 randint(1, lados)
                 for _ in range (0, quant)
-            ]
+                ]
 
             dados.append([*temp])
             temp.clear()
@@ -231,27 +233,28 @@ class RolarDados(commands.Cog):
         embed = discord.Embed(
             title= "Resultados:",
             color=0xdfca7f
-        )
+            )
 
         for loop_rolagem in range(0, vezes):
             mensagem = f"{loop_rolagem+1}º:"
             sub_mensagem = (
                 f"{dados[loop_rolagem]}",
                 f"\nSoma: {lista_somas[d]+soma}"
-            )
+                )
 
             embed.add_field(
                 name= mensagem,
                 value= sub_mensagem
-            )
+                )
 
         await ctx.send(embed=embed)
 
     @commands.hybrid_command(
         name= "sortdado",
         description= 'Sorteia um tipo de dado!'
-    )
+        )
     async def sortdado(self, ctx):
+
         """hybrid command, sorteia um tipo de dado
         dos 7 tipos clássicos [d4 a d100]
 
@@ -259,23 +262,30 @@ class RolarDados(commands.Cog):
             ctx (_type_): contexto do comando
         """
 
-        tipos = ["d4", "d6", "d8", "d10", "d12", "d20", 'd100']
+        tipos = [
+            "d4", "d6", "d8", 
+            "d10", "d12", "d20", 
+            'd100'
+            ]
         sort = choice(tipos)
 
         mensagem = (
             f"{ctx.author.name},",
             f" o tipo de dado sorteado foi: {sort}"
-        )
+            )
         await mandar_embed(
             contexto= ctx,
             autor= mensagem
-        )
+            )
 
 async def setup(bot):
-    """Função assíncrona que faz o executa a cog
+
+    """
+    Função assíncrona que faz o executa a cog
     desse arquivo no Main.py
 
     Args:
-        bot (_type_): client ou bot do arquivo Main.py
+        bot: client ou bot do arquivo Main.py
     """
+
     await bot.add_cog(RolarDados(bot))

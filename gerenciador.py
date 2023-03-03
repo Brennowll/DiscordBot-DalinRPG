@@ -1,6 +1,7 @@
 from discord.ext import commands
 from modulos.funcoes import mandar_embed
-import discord, yaml
+import discord
+import yaml
 
 class gerenciador(commands.Cog):
     def __init__(self, bot):

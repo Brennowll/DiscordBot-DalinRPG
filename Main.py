@@ -1,4 +1,8 @@
-import discord, os, asyncio, yaml
+import discord
+import asyncio 
+import yaml
+
+from os import listdir
 from discord.ext import commands
 from decouple import config
 
@@ -17,7 +21,7 @@ activity = discord.Game(name="/ajuda")
 bot = commands.Bot(command_prefix=pegar_prefixo_server, intents=intents,  activity=activity, status=discord.Status.idle)
 
 async def carregar():
-    for pasta in os.listdir("./comandos"):
+    for pasta in listdir("./comandos"):
         if pasta.endswith(".py"):
             await bot.load_extension(f"comandos.{pasta[:-3]}")
     await bot.load_extension("gerenciador")
