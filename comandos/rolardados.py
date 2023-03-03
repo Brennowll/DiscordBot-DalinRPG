@@ -1,175 +1,281 @@
-import discord
-from discord.ext import commands
+"""
+Arquivo para armazenar a categoria de comandos do
+bot relacionados a dados e rolagem de dados.
+
+Contém:
+    class Rolardados: (commands.cog)
+        Classe de cogs para a categoria rolagem de dados do DiscordBOT
+    class setup: (bot/client)
+        Classe para inicializar a cog de comandos
+        'Rolar dados' no arquivo Main.py
+"""
+
 from random import randint, choice
 
+from discord.ext import commands
+import discord
 
-class Rolardados(commands.Cog):
-    """Rola dados de todos os tipos"""
+from modulos.funcoes import mandar_embed
+
+
+class RolarDados(commands.Cog):
+    """
+    Classe de cogs para exportar hybrid commands
+    da categoria de comandos 'Rolagem de dados'
+
+    1: 'rolarum' = hybrid command, faz a rolagem de um dado
+    2: 'rolar' = hybrid command, rolagem multiplos dados em uma str
+    3: 'rolarloop' = hybrid command, faz um loop da função 'rolarum'
+    4: 'sortdado' = hybrid command, sorteia um tipo de dado
+    """
 
     def __init__(self, bot):
         self.bot = bot
-    
-    @commands.hybrid_command(name="rolarum", description="Rola UM dado de sua escolha!")
+
+    @commands.hybrid_command(
+        name= "rolarum",
+        description= "Rola UM dado de sua escolha!"
+        )
     async def rolarum(self, ctx, *, quant: int, lados: int):
-        try:
-            if lados != 4 and lados != 6 and lados != 8 and lados != 10 and lados != 12 and lados !=20 and lados != 100:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O dado que você digitou não existe!!",)
-                await ctx.send(embed=embed, ephemeral=True)
-            else:
-                dados = list()
-                som = 0
+        """
+        hybrid command, rola um dado a partir da
+        quantidade de dados e de quantos lados o dado tem
 
-                for c in range(0, quant):
-                    dados.append(randint(1, lados))
-                
-                for d in range(0, quant):
-                    num = dados[d]
-                    som += num
-                
-                embed = discord.Embed(description= f"Soma das rolagens: {som}", color=0xdfca7f)
-                embed.set_author(name=f"Resultado: {dados}",)
-                await ctx.send(embed=embed)
-                dados.clear()
-            
-        except:
-            embed = discord.Embed(color=0xdfca7f)
-            embed.set_author(name=f"Oops.. use o /rolarum para este comando!\n..é mais estável :)")
-            await ctx.send(embed=embed, ephemeral=True)
+        Args:
+            ctx (_type_): contexto do comando executado
+            quant (int): quantidade de dados para rolar
+            lados (int): tipo de dado, quantos lados tem
+        """
 
-    @commands.hybrid_command(name="rolar", description="Rola dados! (Ex: 1d8+3d6+2d12+20)")
+        lista_dados_validos = [4, 6, 8, 10, 12, 20, 100]
+        verificar_dados = lados in lista_dados_validos
+
+        if not verificar_dados:
+            mensagem = "O dado que você digitou não existe!!"
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+                )
+            return
+
+        dados_rolados = [
+            randint(1, lados)
+            for _ in range (0, quant)
+            ]
+        soma_todas_rolagens = sum(dados_rolados)
+
+        descricao = f"Soma das rolagens: {soma_todas_rolagens}"
+        mensagem = f"Resultado: {dados_rolados}"
+        await mandar_embed(
+            contexto= ctx,
+            desc= descricao,
+            autor= mensagem
+            )
+
+    @commands.hybrid_command(
+        name= "rolar",
+        description= "Rola dados! (Ex: 1d8+3d6+2d12+20)"
+        )
     async def rolar(self, ctx, *, dado: str):
-        quant1 = quant2 = quant3 = 0
-        lados1 = lados2 = lados3 = 4
-        somar = 0
-        tipo = dado.count("d")
-        mais = dado.count("+")
+        """hybrid command, faz a rolagem de multiplos dados a
+        partir da string passada Ex: '2d6+3d8+5'
 
-        try:
-            quant1 = int(dado[0:dado.find("d")])
-            if tipo == 1 and mais == 0:
-                lados1 = int(dado[dado.find("d")+1:])
-            elif tipo == 1 and mais == 1:
-                lados1 = int(dado[dado.find("d")+1:dado.find("+")])
-                somar = int(dado[dado.find("+")+1:])
+        Args:
+            ctx (_type_): contexto do comando
+            dado (str): valor completo para rolagem dos dados
+        """
 
-            elif tipo == 2 and mais == 1:
-                lados1 = int(dado[dado.find("d")+1:dado.find("+")])
-                quant2 = int(dado[dado.find("+")+1:dado.find("d", 3)])
-                lados2 = int(dado[dado.find("d", 3)+1:])
-            elif tipo == 2 and mais == 2:
-                lados1 = int(dado[dado.find("d")+1:dado.find("+")])
-                quant2 = int(dado[dado.find("+")+1:dado.find("d", 3)])
-                lados2 = int(dado[dado.find("d", 3)+1:dado.rfind("+")])
-                somar = int(dado[dado.rfind("+")+1:])
+        contagem_d = dado.count("d")
+        rolagem_invalida = contagem_d == 0
 
-            elif tipo == 3 and mais == 2:
-                lados1 = int(dado[dado.find("d")+1:dado.find("+")])
-                quant2 = int(dado[dado.find("+")+1:dado.find("d", 3)])
-                lados2 = int(dado[dado.find("d", 3)+1:dado.rfind("+")])
-                quant3 = int(dado[dado.rfind("+")+1:dado.rfind("d")])
-                lados3 = int(dado[dado.rfind("d")+1:])
-            elif tipo == 3 and mais == 3:
-                lados1 = int(dado[dado.find("d")+1:dado.find("+")])
-                quant2 = int(dado[dado.find("+")+1:dado.find("d", 3)])
-                lados2 = int(dado[dado.find("d", 3)+1:dado.find("+", 7)])
-                quant3 = int(dado[dado.find("+", 7)+1:dado.rfind("d")])
-                lados3 = int(dado[dado.rfind("d")+1:dado.rfind("+")])
-                somar = int(dado[dado.rfind("+")+1:])
-            
-            if lados1 != 4 and lados1 != 6 and lados1 != 8 and lados1 != 10 and lados1 != 12 and lados1 !=20 and lados1 != 100:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O 1º dado que você digitou não existe!")
-                await ctx.send(embed=embed, ephemeral=True)
-            elif lados2 != 4 and lados2 != 6 and lados2 != 8 and lados2 != 10 and lados2 != 12 and lados2 !=20 and lados2 != 100:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O 2º dado que você digitou não existe!")
-                await ctx.send(embed=embed, ephemeral=True)
-            elif lados3 != 4 and lados3 != 6 and lados3 != 8 and lados3 != 10 and lados3 != 12 and lados3 !=20 and lados3 != 100:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O 3º dado que você digitou não existe!")
-                await ctx.send(embed=embed, ephemeral=True)
-            else:
-                dados = list()
-                temp = list()
-                quanttot = quant1+quant2+quant3
-                som = 0
+        if rolagem_invalida:
+            mensagem = "Digite uma rolagem de dados válida!"
+            descricao = "Exemplos: 2d20+3d12 / 3d100 / 1d10+5"
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem[0],
+                desc= descricao,
+                esconder= True
+                )
+            return
 
-                for e in range(0, tipo):
-                    e += 1
-                    if e == 1:
-                        for c in range(0, quant1):
-                            dados.append(randint(1, lados1))
-                    elif e == 2:
-                        for c in range(0, quant2):
-                            dados.append(randint(1, lados2))
-                    elif e == 3:
-                        for c in range(0, quant3):
-                            dados.append(randint(1, lados3))
+        quantidades_a_rolar = []
+        tipo_dados_p_rolar = []
 
-                for h in range(0, quanttot):
-                    som += dados[h]
-                som += somar
+        dados_separados = dado.split(sep= "+")
+        valor_para_somar = 0
 
-                embed = discord.Embed(title= f"Resultado (Soma): {som}", color=0xdfca7f)
-                if tipo == 1:
-                    embed.add_field(name=f"d{lados1}'s:", value=f"{dados}")
-                elif tipo == 2:
-                    embed.add_field(name=f"d{lados1}'s:", value=f"{dados[0: quant1]}")
-                    embed.add_field(name=f"d{lados2}'s:", value=f"{dados[quant1:]}")
-                elif tipo == 3:
-                    embed.add_field(name=f"d{lados1}'s:", value=f"{dados[0: quant1]}")
-                    embed.add_field(name=f"d{lados2}'s:", value=f"{dados[quant1:quant1+quant2]}")
-                    embed.add_field(name=f"d{lados3}'s:", value=f"{dados[quant1+quant2:]}")
-                await ctx.send(embed=embed)
-        except:
-            embed = discord.Embed(color=0xdfca7f)
-            embed.set_author(name=f"Oops.. use uma rolagem válida!\nEx: 2d20+10 // 10d8+2d4\nUse o /ajuda para entender melhor")
-            await ctx.send(embed=embed, ephemeral=True)
-        
-    @commands.hybrid_command(name="rolarloop", description="Rola um amontoado de dados mais de uma vez")
-    async def rolarloop(self, ctx, *, quant: int, lados: int, soma: int, vezes: int):
-        try:
-            if lados != 4 and lados != 6 and lados != 8 and lados != 10 and lados != 12 and lados !=20 and lados != 100:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O dado que você digitou não existe!!")
-                await ctx.send(embed=embed, ephemeral=True)
-            else:
-                dados = list()
-                somlist = list()
-                temp = list()
-                som = 0
+        for strdado in dados_separados:
 
-                for e in range(0, vezes):
-                    for c in range(0, quant):
-                        temp.append(randint(1, lados))
-                    dados.append(temp[:])
-                    temp.clear()
+            soma_da_rolagem = strdado.count("d") == 0
+            if soma_da_rolagem:
+                valor_para_somar = int(strdado)
+                break
 
-                for h in range(0, vezes):
-                    for f in range(0, quant):
-                        som += dados[h][f]
-                    somlist.append(som)
-                    som = 0
+            separar = strdado.split(sep= "d")
 
-                embed = discord.Embed(title= "Resultados:", color=0xdfca7f)
-                for d in range(0, vezes):
-                    embed.add_field(name=f"{d+1}º:", value=f"{dados[d]}\nSoma: {somlist[d]+soma}")
-                await ctx.send(embed=embed)
-                temp.clear()
-        except:
-            embed = discord.Embed(color=0xdfca7f)
-            embed.set_author(name=f"Oops.. use o /rolarloop para este comando!\n..é mais estável :)")
-            await ctx.send(embed=embed, ephemeral=True)
-            
-    @commands.hybrid_command(name="sortdado", description='Sorteia um tipo de dado!')
-    async def sortdado(self, ctx):
-        tipos = ["d4", "d6", "d8", "d10", "d12", "d20", 'd100']
-        sort = choice(tipos)
-        
-        embed = discord.Embed(color=0xdfca7f)
-        embed.set_author(name=f"{ctx.author.name}, o tipo de dado sorteado foi: {sort}")
+            quantidades_a_rolar.append(int(separar[0]))
+            tipo_dados_p_rolar.append(int(separar[1]))
+
+        lista_dados_validos = [4, 6, 8, 10, 12, 20, 100]
+        dados_invalidos = [
+            valor
+            for valor in tipo_dados_p_rolar
+            if valor not in lista_dados_validos
+        ]
+        verificar_tipos_dados = len(dados_invalidos) == 0
+
+        if not verificar_tipos_dados:
+            mensagem = (
+                "Um dos dados que você digitou não existe!",
+                "dados existentes: (4, 6, 8, 10, 12, 20, 100)"
+            )
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem[0],
+                desc= mensagem[1],
+                esconder= True
+            )
+            return
+
+        dados_sorteados = [
+            randint(1, tipo_dados_p_rolar[pos])
+            for pos in range(0, len(quantidades_a_rolar))
+            for _ in range(0, quantidades_a_rolar[pos])
+        ]
+
+        som_quantidades = 0
+        lista_organizada = []
+
+        for valor in quantidades_a_rolar:
+            som_final = som_quantidades + valor
+
+            rolagem = list(dados_sorteados[som_quantidades: som_final])
+            lista_organizada.append(rolagem)
+
+            som_quantidades += valor
+
+        soma_todas_rolagens = sum(dados_sorteados) + valor_para_somar
+        mensagem_titulo = f"Resultado (Soma): {soma_todas_rolagens}"
+
+        embed = discord.Embed(
+            title= mensagem_titulo,
+            color= 0xdfca7f
+        )
+
+        posicao = 0
+        for valor in tipo_dados_p_rolar:
+            titulo_field = f"d{valor}'s"
+            descricao_field = str(lista_organizada[posicao])
+
+            posicao += 1
+
+            embed.add_field(
+                name= titulo_field,
+                value= descricao_field
+            )
+
+        await ctx.send(
+            embed= embed
+        )
+
+    @commands.hybrid_command(
+        name= "rolarloop",
+        description= "Rola um amontoado de dados mais de uma vez"
+    )
+    async def rolarloop(
+        self, ctx, *,
+        quant: int, lados: int,
+        soma: int, vezes: int
+    ):
+        """hybrid command, faz a rolagem de um dado em loop
+        Ex: Um RPG player tem 3 ações e quer atacar em todas
+
+        Args:
+            ctx (_type_): contexto do comando
+            quant (int): quantidade de dados a rolar
+            lados (int): tipo de dado a rolar
+            soma (int): valor a se somar no final dos loops
+            vezes (int): quantos loops irão ser feitos
+        """
+
+        lista_dados_validos = [4, 6, 8, 10, 12, 20, 100]
+        dados_validados = lados in lista_dados_validos
+
+        if not dados_validados:
+            mensagem = "O dado que você digitou não existe!!"
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+            return
+
+        dados = []
+        lista_somas = []
+        temp = []
+
+        for _ in range(0, vezes):
+            temp = [
+                randint(1, lados)
+                for _ in range (0, quant)
+            ]
+
+            dados.append([*temp])
+            temp.clear()
+
+        for lista in dados:
+            lista_somas.append(sum(lista))
+
+        embed = discord.Embed(
+            title= "Resultados:",
+            color=0xdfca7f
+        )
+
+        for loop_rolagem in range(0, vezes):
+            mensagem = f"{loop_rolagem+1}º:"
+            sub_mensagem = (
+                f"{dados[loop_rolagem]}",
+                f"\nSoma: {lista_somas[d]+soma}"
+            )
+
+            embed.add_field(
+                name= mensagem,
+                value= sub_mensagem
+            )
+
         await ctx.send(embed=embed)
 
+    @commands.hybrid_command(
+        name= "sortdado",
+        description= 'Sorteia um tipo de dado!'
+    )
+    async def sortdado(self, ctx):
+        """hybrid command, sorteia um tipo de dado
+        dos 7 tipos clássicos [d4 a d100]
+
+        Args:
+            ctx (_type_): contexto do comando
+        """
+
+        tipos = ["d4", "d6", "d8", "d10", "d12", "d20", 'd100']
+        sort = choice(tipos)
+
+        mensagem = (
+            f"{ctx.author.name},",
+            f" o tipo de dado sorteado foi: {sort}"
+        )
+        await mandar_embed(
+            contexto= ctx,
+            autor= mensagem
+        )
+
 async def setup(bot):
-    await bot.add_cog(Rolardados(bot))
+    """Função assíncrona que faz o executa a cog
+    desse arquivo no Main.py
+
+    Args:
+        bot (_type_): client ou bot do arquivo Main.py
+    """
+    await bot.add_cog(RolarDados(bot))

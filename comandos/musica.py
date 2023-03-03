@@ -1,5 +1,7 @@
 from os import remove
 from discord.ext import commands
+from modulos.funcoes import *
+
 import discord
 import yaml
 
@@ -7,9 +9,18 @@ def repetir(vc, ctx):
     """Função que coloca a música em loop"""
 
     global lista_volume
+    id_autor_message = f"{ctx.author.id}"
+    nome_musica = queue[id_autor_message]
+    local_music = f"musicas/{nome_musica}"
 
-    vc.play(discord.FFmpegPCMAudio(source=f"musicas/{str(queue[0])}"), after=lambda e: repetir(vc=vc, ctx=ctx))
-    vc.source = discord.PCMVolumeTransformer(vc.source, volume=lista_volume[f"{ctx.author.id}"])
+    vc.play(
+        discord.FFmpegPCMAudio(source = local_music), 
+        after = lambda e: repetir(vc=vc, ctx=ctx)
+    )
+    vc.source = discord.PCMVolumeTransformer(
+        vc.source, 
+        volume=lista_volume[f"{ctx.author.id}"]
+    )
     vc.is_playing()
 
 
@@ -17,221 +28,365 @@ class musica(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="criartrilha", description='Cadastra uma música como triha sonora')
+    @commands.hybrid_command(name = "criartrilha", description = 'Cadastra uma música como triha sonora')
     async def criartrilha(self, ctx, *, apelido: str, arquivo_mp3: discord.Attachment):
         nomearq = arquivo_mp3.filename
-        try:
-            if arquivo_mp3.size > 15000000:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O arquivo.mp3 precisa ter 15mb ou menos!")
-                await ctx.send(embed=embed, ephemeral=True)
-            else:
-                if len(apelido) > 20:
-                    embed = discord.Embed(color=0xdfca7f)
-                    embed.set_author(name=f"O apelido pode ter no máximo 20 letras!")
-                    await ctx.send(embed=embed, ephemeral=True)
+        
+        if arquivo_mp3.size > 15000000:
+            mensagem = f"O arquivo.mp3 precisa ter 15mb ou menos!"
+            
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
+        
+        elif len(apelido) > 20:
+            mensagem = f"O apelido pode ter no máximo 20 letras!"
+            
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+                            
+            return
+        
+        elif nomearq.endswith(".mp3") is False:
+            mensagem = f"O arquivo precisa ser .mp3!"
+            
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+                            
+            return
 
-                else:
-                    if nomearq.endswith(".mp3"):
-                        with open("bancodedados/apelidos.yaml", "r") as arq:
-                            arquiv = yaml.safe_load(arq)
-
-                        try:
-                            remove(f"musicas/{arquiv[str(ctx.author.id)][f'{apelido}']}")
-                        except:
-                            pass
-
-                        try:
-                            arquiv[str(ctx.author.id)][f"{apelido}"] = f"{nomearq}"
-                        except:
-                            arquiv[str(ctx.author.id)] = {f"{apelido}": f"{nomearq}"}
-
-                        if len(arquiv[str(ctx.author.id)]) >= 11:
-                            embed = discord.Embed(description=f"Da uma olhadinha nesses comandos aqui:\n/listatrilhas /deltrilha /deltodas\n(Pra você liberar espaço :p )",color=0xdfca7f)
-                            embed.set_author(name=f"Eeeepa {ctx.author.name}, você já cadastrou 10 trilhas sonoras, esse é o máximo!")
-                            await ctx.send(embed=embed, ephemeral=True)
-
-                        else:
-                            with open("bancodedados/apelidos.yaml", "w") as arq:
-                                yaml.dump(arquiv, arq)
-
-                            embed = discord.Embed(color=0xdfca7f)
-                            embed.set_author(name=f"{ctx.author.name} criou uma trilha sonora!\nApelido: {apelido}\nNome da música: {nomearq}")
-                            await ctx.send(embed=embed)
-
-                            for arquivo_mp3 in ctx.message.attachments:
-                                await arquivo_mp3.save(f"musicas/{nomearq}")
-
-                    else:
-                        embed = discord.Embed(color=0xdfca7f)
-                        embed.set_author(name=f"O arquivo precisa ser .mp3!")
-                        await ctx.send(embed=embed, ephemeral=True)
-        except Exception as e:
-            print(e)
-
-    @commands.hybrid_command(name="trilha", description="Toca a trilha criada com /criartrilha!")
-    async def trilha(self, ctx, *, apelido: str):
-        try:
-            global queue
-
-            try:
-                voice_channel = ctx.author.voice.channel
-            except:
-                voice_channel = None
-
-            if voice_channel != None:
-                try:
-                    vc = await voice_channel.connect()
-                except:
-                    vc: player = ctx.voice_client
-
-                vc.stop()
-
-                with open("bancodedados/apelidos.yaml", "r") as arq:
-                        arquiv = yaml.safe_load(arq)
-
-                try:
-                    del(queue[0])
-                except:
-                    pass
-
-                try:
-                    nomemusica = arquiv[str(ctx.author.id)][apelido]
-                except:
-                    embed = discord.Embed(description=f"[tente o comando novamente ou crie uma trilha sonora com o /criartrilha]", color=0xdfca7f)
-                    embed.set_author(name=f"O apelido digitado não existe!")
-                    await ctx.send(embed=embed, ephemeral=True)
-
-                    await vc.disconnect()
-
-                try:
-                    queue.append(nomemusica)
-
-                    embed = discord.Embed(description=f"[{nomemusica}]", color=0xdfca7f)
-                    embed.set_author(name=f"Tocando agora: {apelido}")
-                    await ctx.send(embed=embed)
-
-                    print
-
-                    # executable="C:/PATH_Programs/ffmpeg.exe", 
-                    vc.play(discord.FFmpegPCMAudio(source=f"musicas/{str(queue[0])}"), after=lambda e: repetir(vc=vc, ctx=ctx))
-                    vc.source = discord.PCMVolumeTransformer(vc.source, volume=1.0)
-                except:
-                    pass
+        with open("bancodedados/apelidos.yaml", "r") as arq:
+            arquiv = yaml.safe_load(arq)
+            
+        id_autor_message = f"{ctx.author.id}"
+        
+        if id_autor_message in arquiv:
+            if f'{apelido}' in arquiv[id_autor_message]:
+                remove(f"musicas/{arquiv[id_autor_message][f'{apelido}']}")
                 
-            else:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"Você precisa entrar em um canal de voz primeiro")
-                await ctx.send(embed=embed, ephemeral=True)
-        except Exception as e:
-            print(e)
+            arquiv[id_autor_message][f"{apelido}"] = f"{nomearq}"
+        
+        else:
+            arquiv[id_autor_message] = {apelido: f"{nomearq}"}
 
-    @commands.hybrid_command(name="ptrilha", description="Para a trilha sonora que está tocando!")
-    async def ptrilha(self, ctx):
+        if len(arquiv[id_autor_message]) >= 11:
+            mensagem = f"Eeeepa {ctx.author.name}, você já cadastrou 10 trilhas sonoras, esse é o máximo!"
+            descricao = f"Da uma olhadinha nesses comandos aqui:\n/listatrilhas /deltrilha /deltodas\n(Pra você liberar espaço :p )"
+            
+            await mandar_embed(
+                contexto= ctx,
+                desc= descricao,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
+
+        with open("bancodedados/apelidos.yaml", "w") as arq:
+            yaml.dump(arquiv, arq)
+
+        mensagem = f"{ctx.author.name} criou uma trilha sonora!\nApelido: {apelido}\nNome da música: {nomearq}"
+
+        await mandar_embed(
+            contexto= ctx,
+            autor= mensagem
+        )
+
+        for arquivo_mp3 in ctx.message.attachments:
+            await arquivo_mp3.save(f"musicas/{nomearq}")
+                        
+    @commands.hybrid_command(name = "trilha", description = "Toca a trilha criada com /criartrilha!")
+    async def trilha(self, ctx, *, apelido: str):
+        global queue
+        global tocando
+
         try:
-            voice_state = ctx.guild.voice_client
-            voice_state.stop()
-            await voice_state.disconnect()
-
-            embed = discord.Embed(color=0xdfca7f)
-            embed.set_author(name=f"A trilha sonora parou!")
-            await ctx.send(embed=embed)
+            voice_channel = ctx.author.voice.channel
         except:
-            embed = discord.Embed(color=0xdfca7f)
-            embed.set_author(name=f"Não tem nenhuma trilha sonora tocando? ué")
-            await ctx.send(embed=embed, ephemeral=True)
-    
-    @commands.hybrid_command(name="listatrilhas", description="Lista das trilhas que você cadastrou!")
+            voice_channel = None
+
+        if voice_channel == None:
+            mensagem = f"Você precisa entrar em um canal de voz primeiro"
+            
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
+        
+        with open("bancodedados/apelidos.yaml", "r") as arq:
+            arquiv = yaml.safe_load(arq)  
+                
+        id_autor_message = f"{str(ctx.author.id)}"
+        
+        try:
+            id_existe = arquiv[id_autor_message]
+        except:
+            id_existe = None
+        
+        if id_existe == None:
+            mensagem = "Você ainda não cadastrou nenhuma trilha sonora"
+            descricao = "[tente o comando novamente ou crie uma trilha sonora com o /criartrilha]"
+            
+            await mandar_embed(
+                contexto= ctx,
+                desc= descricao,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
+            
+        if apelido not in arquiv[id_autor_message]:
+            mensagem = "O apelido digitado não existe!"
+            descricao = "[tente o comando novamente ou use /criartrilha /listatrilhas]"
+            
+            await mandar_embed(
+                contexto= ctx,
+                desc= descricao,
+                autor= mensagem,
+                esconder= True
+            )
+
+            return  
+            
+        nome_canal = ctx.voice_client
+        nao_conectado = nome_canal == None
+                    
+        vc = await voice_channel.connect() if nao_conectado else nome_canal
+
+        vc.stop()
+        tocando.append(str(ctx.guild.id))
+
+        nomemusica = f"{arquiv[id_autor_message][apelido]}"
+        queue[id_autor_message] = nomemusica
+
+        await mandar_embed(
+            contexto= ctx,
+            desc= f"[{nomemusica}]",
+            autor= f"Tocando agora: {apelido}"
+        )
+
+        vc.play(
+            discord.FFmpegPCMAudio(source = f"musicas/{nomemusica}"), 
+            after = lambda e: repetir(vc=vc, ctx=ctx)
+        )
+        vc.source = discord.PCMVolumeTransformer(
+            vc.source, 
+            volume=1.0
+        )
+
+    @commands.hybrid_command(name = "ptrilha", description = "Para a trilha sonora que está tocando!")
+    async def ptrilha(self, ctx):
+        global tocando
+        id_guilda = str(ctx.guild.id)
+                
+        if id_guilda not in tocando:
+            mensagem = f"Não tem nenhuma trilha sonora tocando? ué"
+            
+            embed = discord.Embed(color = 0xdfca7f)
+            embed.set_author(name = mensagem)
+            await ctx.send(
+                embed = embed, 
+                ephemeral = True
+            )
+            
+            return
+
+        tocando.remove(id_guilda)
+
+        voice_state = ctx.guild.voice_client
+        voice_state.stop()
+        await voice_state.disconnect()
+
+        mensagem = f"A trilha sonora parou!"
+        
+        await mandar_embed(
+            contexto= ctx,
+            autor= mensagem
+        )
+
+    @commands.hybrid_command(name = "listatrilhas", description = "Lista das trilhas que você cadastrou!")
     async def listatrilhas(self, ctx):
         with open("bancodedados/apelidos.yaml", "r") as pasta:
             arquiv = yaml.safe_load(pasta)
 
+        id_autor_message = f"{str(ctx.author.id)}"
+
         try:
-            lista = str(arquiv[str(ctx.author.id)])
-            listab = lista.replace("mp3',", "mp3'\n \n")
-            listac = listab.replace("'", "")
-            listad = listac.replace("{", "")
-
-            embed = discord.Embed(description=f"{listad}",color=0xdfca7f)
-            embed.set_author(name=f"Lista de trilhas {ctx.author.name}:")
-            await ctx.send(embed=embed)
-
+            id_existe = arquiv[id_autor_message]
         except:
-            embed = discord.Embed(description=f"(Tente o comando /criartrilha)",color=0xdfca7f)
-            embed.set_author(name=f"Oops.. não parece que você tem alguma trilha criada!")
-            await ctx.send(embed=embed, ephemeral=True)
+            id_existe = None
+            
+        if id_existe == None:
+            mensagem = "Oops.. não parece que você tem alguma trilha criada!"
+            descricao = "(Tente o comando /criartrilha)"
+            
+            await mandar_embed(
+                contexto= ctx,
+                desc= descricao,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
 
-    @commands.hybrid_command(name="deltrilha", description="Deleta uma trilha criada!")
+        lista = str(arquiv[str(ctx.author.id)])
+        listab = lista.replace("mp3',", "mp3'\n \n")
+        listac = listab.replace("'", "")
+        listad = listac.replace("{", "")
+
+        mensagem = f"Lista de trilhas {ctx.author.name}:"
+
+        await mandar_embed(
+            contexto= ctx,
+            desc= f"{listad}",
+            autor= mensagem
+        )
+            
+    @commands.hybrid_command(name = "deltrilha", description = "Deleta uma trilha criada!")
     async def deltrilha(self, ctx, *, apelido: str):
-        try:
-            with open("bancodedados/apelidos.yaml", "r") as arq:
+        with open("bancodedados/apelidos.yaml", "r") as arq:
                 arquiv = yaml.safe_load(arq)
-
-            musicdel = arquiv[str(ctx.author.id)][apelido]
-            remove(f"musicas/{arquiv[str(ctx.author.id)][apelido]}")
-            del arquiv[str(ctx.author.id)][apelido] 
-
-            with open("bancodedados/apelidos.yaml", "w") as arq:
-                yaml.dump(arquiv, arq)
-
-            embed = discord.Embed(description=f"({musicdel})",color=0xdfca7f)
-            embed.set_author(name=f"{ctx.author.name} deletou a trilha {apelido}!")
-            await ctx.send(embed=embed)
-
+        
+        try:
+            sem_dados = None
+            id_autor_dados = arquiv[str(ctx.author.id)]
+            nome_musica = arquiv[str(ctx.author.id)][apelido]
         except:
-            embed = discord.Embed(description=f"(Tente esses comandos: /listatrilha /criartrilha)",color=0xdfca7f)
-            embed.set_author(name=f"ish.. parece que essa trilha não existe ou você não cadastrou nenhuma trilha")
-            await ctx.send(embed=embed, ephemeral=True)
+            sem_dados = True
+                
+        if sem_dados == True:
+            descricao = "(Tente esses comandos: /listatrilha /criartrilha)"
+            mensagem = "ish.. parece que essa trilha não existe ou você não cadastrou nenhuma trilha"
+            
+            await mandar_embed(
+                contexto= ctx,
+                desc= descricao,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return    
+            
+        musicdel = nome_musica
+        remove(f"musicas/{nome_musica}")
+        del arquiv[str(ctx.author.id)][apelido] 
 
-    @commands.hybrid_command(name="deltodtrilhas", description="Apaga todas as suas trilhas criadas!")
+        with open("bancodedados/apelidos.yaml", "w") as arq:
+            yaml.dump(arquiv, arq)
+
+        mensagem = f"{ctx.author.name} deletou a trilha {apelido}!"
+
+        await mandar_embed(
+            contexto= ctx,
+            desc= f"({musicdel})",
+            autor= mensagem
+        )
+
+    @commands.hybrid_command(name = "deltodtrilhas", description = "Apaga todas as suas trilhas criadas!")
     async def deltodastrilhas(self, ctx):
-        try:
-            with open("bancodedados/apelidos.yaml", "r") as arq:
-                arquiv = yaml.safe_load(arq)
+        
+        with open("bancodedados/apelidos.yaml", "r") as arq:
+            arquiv = yaml.safe_load(arq)
+        
+        if str(ctx.author.id) not in arquiv:
+            descricao = "(Tente esses comandos: /listatrilha /criartrilha)"
+            mensagem = "Oops.. Você não tem nenhuma trilha criada :/"
+            
+            await mandar_embed(
+                contexto= ctx,
+                desc= descricao,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
+        
+        mus_para_del = arquiv[str(ctx.author.id)]
+        
+        for mus in mus_para_del:
+            remove(f"musicas/{arquiv[str(ctx.author.id)][mus]}")
+            
+        del arquiv[str(ctx.author.id)]
 
-            musicasdel = arquiv[str(ctx.author.id)]
-            for mus in musicasdel:
-                remove(f"musicas/{arquiv[str(ctx.author.id)][mus]}")
-            del arquiv[str(ctx.author.id)]
+        with open("bancodedados/apelidos.yaml", "w") as arq:
+            yaml.dump(arquiv, arq)
 
-            with open("bancodedados/apelidos.yaml", "w") as arq:
-                yaml.dump(arquiv, arq)
+        mensagem = f"{ctx.author.name} deletou todas as trilhas!"
+        descricao = f"({mus_para_del})"
 
-            embed = discord.Embed(description=f"({musicasdel})",color=0xdfca7f)
-            embed.set_author(name=f"{ctx.author.name} deletou todas as trilhas!")
-            await ctx.send(embed=embed)
-
-        except:
-            embed = discord.Embed(description=f"(Tente esses comandos: /listatrilha /criartrilha)",color=0xdfca7f)
-            embed.set_author(name=f"Oops.. Você não tem nenhuma trilha criada :/")
-            await ctx.send(embed=embed, ephemeral=True)
-    
-    @commands.hybrid_command(name="vol", description="Muda o volume do DalinRPG!")
+        await mandar_embed(
+            contexto= ctx,
+            desc= descricao,
+            autor= mensagem,
+        )
+            
+    @commands.hybrid_command(name = "vol", description = "Muda o volume do DalinRPG!")
     async def voice_connect(self, ctx, *, volume: int):
         global lista_volume
+        global tocando
+
+        id_guilda = str(ctx.guild.id)
 
         try:
-            vc: player = ctx.voice_client
-
-            if 0 <= volume <= 150:
-                novovol = volume / 100
-                lista_volume[f"{ctx.author.id}"] = novovol
-                vc.source.volume = novovol
-
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O volume foi alterado para: {volume}%")
-                await ctx.send(embed=embed)
-            else:
-                embed = discord.Embed(color=0xdfca7f)
-                embed.set_author(name=f"O volume precisa estar entre 0/150!")
-                await ctx.send(embed=embed, ephemeral=True)
+            voice_channel = ctx.author.voice.channel
         except:
-            embed = discord.Embed(color=0xdfca7f)
-            embed.set_author(name=f"Você precisa estar em um canal com uma trilha sonora tocando pra mudar o volume né! :/")
-            await ctx.send(embed=embed, ephemeral=True)
+            voice_channel = None
+
+        if voice_channel == None or id_guilda not in tocando:
+            mensagem = (
+                "Você precisa entrar em um canal de voz ",
+                "que esteja tocando uma trilha sonora primeiro"
+            )
+
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+            
+            return
+        
+        if volume < 0 or volume > 150:
+            mensagem = "O volume precisa estar entre 0/150!"
+            
+            await mandar_embed(
+                contexto= ctx,
+                autor= mensagem,
+                esconder= True
+            )
+                        
+            return
+            
+        vc: player = ctx.voice_client
+
+        novovol = volume / 100
+        lista_volume[f"{ctx.author.id}"] = novovol
+        vc.source.volume = novovol
+
+        mensagem = f"O volume foi alterado para: {volume}%"
+
+        await mandar_embed(
+            contexto= ctx,
+            autor= mensagem
+        )
 
 lista_volume = {}            
-queue = []
+queue = {}
+tocando = []
 
 async def setup(bot):
     await bot.add_cog(musica(bot))

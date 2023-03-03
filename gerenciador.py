@@ -1,4 +1,5 @@
 from discord.ext import commands
+from modulos.funcoes import mandar_embed
 import discord, yaml
 
 class gerenciador(commands.Cog):
@@ -42,8 +43,9 @@ class gerenciador(commands.Cog):
                 prefixos = yaml.safe_load(pasta)
 
             pre = prefixos[str(message.guild.id)]
+            mensagem = f'Meu prefixo para este server é "{pre}"!!'
             
-            embed = discord.Embed(title= f'Meu prefixo para este server é "{pre}"!!', color=0xdfca7f)
+            embed = discord.Embed(title= mensagem, color=0xdfca7f)
             await message.channel.send(embed=embed)
             await self.bot.process_commands(message)
 
