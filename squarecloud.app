@@ -1,5 +1,0 @@
-DISPLAY_NAME=DalinRPG
-DESCRIPTION=Bot 1.1: DalinRPG
-MAIN=Main.py
-MEMORY=250
-VERSION=recommended
