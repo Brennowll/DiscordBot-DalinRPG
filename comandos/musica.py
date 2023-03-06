@@ -16,14 +16,38 @@ import yaml
 import discord
 from modulos.funcoes import mandar_embed
 
-# Colocar uma variável universal para o caminho do apelidos.yaml
 # Especificar o erro dos excepts
-# Fazer função que abre com with o apelidos.yaml e faz arquiv = safeload
 # Testar vc: player sem o player
 
 lista_volume = {}
 queue = {}
 tocando = []
+
+def carregar_apelidos():
+    """Lê e transfere os dados do arquivo apelidos.yaml
+    para uma variável, retornando os valores dessa variável
+
+    Returns:
+        (list): valores lidos do arquivo apelidos.yaml
+    """
+
+    yaml_apelidos = "bancodedados/apelidos.yaml"
+    with open(yaml_apelidos, "r", encoding= "utf8") as arq:
+        arquiv = yaml.safe_load(arq)
+
+    return arquiv
+
+def mudar_apelidos(variavel):
+    """Faz um safe dump no arquivo apelidos.yaml com
+    os valores de uma variável
+
+    Args:
+        variavel: valor a se escrever no arquivo apelidos.yaml
+    """
+
+    yaml_apelidos = "bancodedados/apelidos.yaml"
+    with open(yaml_apelidos, "w", encoding= "utf8") as arq:
+        yaml.safe_dump(variavel, arq)
 
 def repetir(vc, ctx):
 
@@ -129,11 +153,8 @@ class Musica(commands.Cog):
                 )
             return
 
-        yaml_apelidos = "bancodedados/apelidos.yaml"
         id_autor_message = f"{ctx.author.id}"
-
-        with open(yaml_apelidos, "r", encoding= "utf8") as arq:
-            arquiv = yaml.safe_load(arq)
+        arquiv = carregar_apelidos()
 
         id_ja_cadastrado = id_autor_message in arquiv
         if id_ja_cadastrado :
@@ -172,8 +193,7 @@ class Musica(commands.Cog):
             )
             return
 
-        with open(yaml_apelidos, "w", encoding= "utf8") as arq:
-            yaml.dump(arquiv, arq)
+        mudar_apelidos(arquiv)
 
         mensagem = (
             f"{ctx.author.name} criou uma trilha sonora!",
@@ -224,9 +244,7 @@ class Musica(commands.Cog):
                 )
             return
 
-        with open("bancodedados/apelidos.yaml", "r", encoding= "utf8") as arq:
-            arquiv = yaml.safe_load(arq)
-
+        arquiv = carregar_apelidos()
         id_autor_message = f"{str(ctx.author.id)}"
 
         try:
@@ -346,13 +364,13 @@ class Musica(commands.Cog):
         com uma lista das trilhas sonoras cadastradas pelo
         usuário que usou o comando"""
 
-        with open("bancodedados/apelidos.yaml", "r", encoding= "utf8") as pasta:
-            arquiv = yaml.safe_load(pasta)
-
+        arquiv = carregar_apelidos()
         id_autor_message = f"{str(ctx.author.id)}"
 
         try:
             id_existe = arquiv[id_autor_message]
+        
+        # Especificar except
         except:
             id_existe = None
 
@@ -392,8 +410,7 @@ class Musica(commands.Cog):
             apelido (str): apelido da trilha sonora a se excluir
         """
 
-        with open("bancodedados/apelidos.yaml", "r", encoding= "utf8") as arq:
-                arquiv = yaml.safe_load(arq)
+        arquiv = carregar_apelidos()
 
         try:
             sem_dados = None
@@ -424,8 +441,7 @@ class Musica(commands.Cog):
         remove(f"musicas/{nome_musica}")
         del arquiv[str(ctx.author.id)][apelido]
 
-        with open("bancodedados/apelidos.yaml", "w", encoding= "utf8") as arq:
-            yaml.dump(arquiv, arq)
+        mudar_apelidos(arquiv)
 
         mensagem = f"{ctx.author.name} deletou a trilha {apelido}!"
         await mandar_embed(
@@ -443,8 +459,7 @@ class Musica(commands.Cog):
         """Apaga todos os arquivos.mp3 e os dados de trilha
         sonora que o autor cadastrou com o comando /criartrilha."""
 
-        with open("bancodedados/apelidos.yaml", "r", encoding= "utf8") as arq:
-            arquiv = yaml.safe_load(arq)
+        arquiv = carregar_apelidos()
 
         id_autor_n_cadastrado = str(ctx.author.id) not in arquiv
         if id_autor_n_cadastrado:
@@ -465,18 +480,14 @@ class Musica(commands.Cog):
             return
 
         mus_para_del = arquiv[str(ctx.author.id)]
-
         for mus in mus_para_del:
             remove(f"musicas/{arquiv[str(ctx.author.id)][mus]}")
-
         del arquiv[str(ctx.author.id)]
 
-        with open("bancodedados/apelidos.yaml", "w", encoding= "utf8") as arq:
-            yaml.dump(arquiv, arq)
+        mudar_apelidos(arquiv)
 
         mensagem = f"{ctx.author.name} deletou todas as trilhas!"
         descricao = f"({mus_para_del})"
-
         await mandar_embed(
             contexto= ctx,
             desc= descricao,
@@ -488,7 +499,7 @@ class Musica(commands.Cog):
         description= "Muda o volume do DalinRPG!"
         )
     async def voice_connect(self, ctx, *, volume: int):
-        
+
         """
         Muda o volume da trilha sonora que foi iniciada com
         o comando /trilha
