@@ -7,7 +7,7 @@ Contém:
         Classe de cogs para a categoria 'Musica' do DiscordBOT
     class setup: (bot/client)
         Classe para inicializar a cog de comandos
-        'Rolar dados' no arquivo Main.py
+        'Musica' no arquivo Main.py
 """
 
 from os import remove
@@ -79,7 +79,7 @@ def repetir(vc, ctx):
 
 
 class Musica(commands.Cog):
-    
+
     """
     Classe de cogs para exportar hybrid commands
     da categoria de comandos 'Musica e trilha sonora'
@@ -368,7 +368,7 @@ class Musica(commands.Cog):
 
         try:
             id_existe = arquiv[id_autor_message]
-        
+
         # Especificar except
         except:
             id_existe = None
@@ -401,7 +401,7 @@ class Musica(commands.Cog):
         description= "Deleta uma trilha criada!"
         )
     async def deltrilha(self, ctx, *, apelido: str):
-        
+
         """
         Deleta o arquivo.mp3 e os dados gravados no apelidos.yaml
         sobre uma trilha sonora criada com o comando /criartrilha
@@ -554,4 +554,13 @@ class Musica(commands.Cog):
             )
 
 async def setup(bot):
+
+    """
+    Função assíncrona que faz o executa a cog
+    desse arquivo no Main.py
+
+    Args:
+        bot: client ou bot do arquivo Main.py
+    """
+
     await bot.add_cog(Musica(bot))

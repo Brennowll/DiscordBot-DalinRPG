@@ -1,7 +1,21 @@
+"""
+Módulo para exportar funções que muitos arquivos usam.
+
+Funções:
+    pegar_posicao_str: procura a posição de uma substring
+    na ocorrência da substring especificada.\n
+    mandar_embed: Define partes de uma embed e a manda
+    no contexto de onde o comando foi usado
+"""
+
+
 import discord
 
-def pegar_posicao_str(string = str, subs = str, occorencia = int):
-    """Procura a posição de uma substring em uma string.
+
+def pegar_posicao_str(string: str, subs: str, occorencia: int):
+
+    """
+    Procura a posição de uma substring em uma string.
 
     Args:
         string (str): string principal
@@ -9,11 +23,11 @@ def pegar_posicao_str(string = str, subs = str, occorencia = int):
         ocorrencia (int): numero da ocorrência da substring
 
     Returns:
-        int: Posição da substring na ocorrência especificada 
+        int: Posição da substring na ocorrência especificada
     """
 
     start = string.find(subs)
-    
+
     while start >= 0 and occorencia > 1:
         start = string.find(subs, start+1)
         occorencia -= 1
@@ -23,8 +37,8 @@ def pegar_posicao_str(string = str, subs = str, occorencia = int):
 
 async def mandar_embed(
     titulo: str = None,
-    desc: str = None, 
-    autor: str = None, 
+    desc: str = None,
+    autor: str = None,
     autoricon: str = None,
     titfield: str = None,
     descfield: str = None,
@@ -52,25 +66,25 @@ async def mandar_embed(
     """
 
     embed = discord.Embed(
-        title = titulo, 
-        description = desc, 
+        title = titulo,
+        description = desc,
         colour = 0xdfca7f
-    )
+        )
 
-    if autor != None:
+    if autor is not None:
         embed.set_author(
             name= autor,
             icon_url= autoricon
-    )
+            )
 
-    if titfield != None: 
+    if titfield is not None:
         embed.add_field(
-            name = titfield, 
-            value = descfield, 
+            name = titfield,
+            value = descfield,
             inline = inlifield
-        )
+            )
 
     return await contexto.send(
-        embed = embed, 
+        embed = embed,
         ephemeral = esconder
-    )
+        )

@@ -38,6 +38,7 @@ class RolarDados(commands.Cog):
         description= "Rola UM dado de sua escolha!"
         )
     async def rolarum(self, ctx, *, quant: int, lados: int):
+        
         """
         hybrid command, rola um dado a partir da
         quantidade de dados e de quantos lados o dado tem
@@ -79,7 +80,9 @@ class RolarDados(commands.Cog):
         description= "Rola dados! (Ex: 1d8+3d6+2d12+20)"
         )
     async def rolar(self, ctx, *, dado: str):
-        """hybrid command, faz a rolagem de multiplos dados a
+        
+        """
+        hybrid command, faz a rolagem de multiplos dados a
         partir da string passada Ex: '2d6+3d8+5'
 
         Args:
@@ -191,7 +194,8 @@ class RolarDados(commands.Cog):
         soma: int, vezes: int
         ):
 
-        """hybrid command, faz a rolagem de um dado em loop
+        """
+        hybrid command, faz a rolagem de um dado em loop
         Ex: Um RPG player tem 3 ações e quer atacar em todas
 
         Args:
@@ -255,7 +259,8 @@ class RolarDados(commands.Cog):
         )
     async def sortdado(self, ctx):
 
-        """hybrid command, sorteia um tipo de dado
+        """
+        hybrid command, sorteia um tipo de dado
         dos 7 tipos clássicos [d4 a d100]
 
         Args:

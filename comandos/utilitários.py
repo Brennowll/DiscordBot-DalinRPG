@@ -3,11 +3,11 @@ Módulo para armazenar a categoria de comandos do
 bot relacionados a utilidade e geral.
 
 Contém:\n
-    class utilidades: (commands.cog)\n
+    class Utilidades: (commands.cog)\n
         Classe de cogs para a categoria rolagem de dados do DiscordBOT\n
     class setup: (bot/client)\n
         Classe para inicializar a cog de comandos
-        'utilit' no arquivo Main.py
+        'Utilidades' no arquivo Main.py
 """
 
 
@@ -20,7 +20,7 @@ from modulos.funcoes import mandar_embed
 
 
 class Utilidades(commands.Cog):
-    
+
     """
     Classe cog para exportar hybrid commands
     da categoria de comandos 'utilidades'
@@ -98,7 +98,7 @@ class Utilidades(commands.Cog):
 
         n_existe_barra = entre.count("/") == 0
         if n_existe_barra:
-            
+
             mensagem = (
                 "Atenção, os valores pra serem ",
                 "sorteados devem estar entre barras (Ex: 1/3/5/7)"
@@ -112,7 +112,7 @@ class Utilidades(commands.Cog):
 
         lista_para_sortear = entre.split("/")
         sort = choice(lista_para_sortear)
-        
+
         mensagem = f"sorteado: {sort}"
         descricao = f"Entre: {lista_para_sortear}"
         await mandar_embed(
@@ -126,11 +126,11 @@ class Utilidades(commands.Cog):
         description= "Como funciona os comandos do Dalin!"
         )
     async def ajuda(self, ctx):
-        
+
         """hybrid command, manda um embed no canal que o comando
         foi usado, com a lista de comandos do bot e sua descrição
         para uso dos usuários do discord"""
-        
+
         link_icone = (
             "https://cdn.discordapp.com/attachments/",
             "1065414001418317865/1071041621816246352/DalinComFundo.png"
