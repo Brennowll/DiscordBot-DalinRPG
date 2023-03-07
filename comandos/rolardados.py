@@ -10,15 +10,15 @@ Contém\n
         'Rolar dados' no arquivo Main.py
 """
 
-from random import randint, choice
 
+from random import randint, choice
 from discord.ext import commands
 import discord
-
 from modulos.funcoes import mandar_embed
 
 
 class RolarDados(commands.Cog):
+    
     """
     Classe de cogs para exportar hybrid commands
     da categoria de comandos 'Rolagem de dados'

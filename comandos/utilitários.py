@@ -10,17 +10,17 @@ Contém:\n
         'utilit' no arquivo Main.py
 """
 
-from random import choice
 
+from random import choice
 import discord
 import yaml
 from discord.ext import commands
 from sympy import sympify
-
 from modulos.funcoes import mandar_embed
 
 
 class Utilidades(commands.Cog):
+    
     """
     Classe cog para exportar hybrid commands
     da categoria de comandos 'utilidades'
@@ -97,8 +97,8 @@ class Utilidades(commands.Cog):
         """
 
         n_existe_barra = entre.count("/") == 0
-
         if n_existe_barra:
+            
             mensagem = (
                 "Atenção, os valores pra serem ",
                 "sorteados devem estar entre barras (Ex: 1/3/5/7)"
@@ -111,22 +111,26 @@ class Utilidades(commands.Cog):
             return
 
         lista_para_sortear = entre.split("/")
-
         sort = choice(lista_para_sortear)
+        
         mensagem = f"sorteado: {sort}"
         descricao = f"Entre: {lista_para_sortear}"
-
         await mandar_embed(
             contexto= ctx,
             autor= mensagem,
             desc= descricao
-        )
+            )
 
     @commands.hybrid_command(
         name= "ajuda",
         description= "Como funciona os comandos do Dalin!"
         )
     async def ajuda(self, ctx):
+        
+        """hybrid command, manda um embed no canal que o comando
+        foi usado, com a lista de comandos do bot e sua descrição
+        para uso dos usuários do discord"""
+        
         link_icone = (
             "https://cdn.discordapp.com/attachments/",
             "1065414001418317865/1071041621816246352/DalinComFundo.png"
@@ -248,8 +252,8 @@ class Utilidades(commands.Cog):
 async def setup(bot):
 
     """
-    Função assíncrona que faz o executa a cog
-    desse arquivo no Main.py
+    Função assíncrona que executa a cog
+    Utilidades no arquivo Main.py
 
     Args:
         bot: client ou bot do arquivo Main.py

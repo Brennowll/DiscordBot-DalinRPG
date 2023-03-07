@@ -79,6 +79,7 @@ def repetir(vc, ctx):
 
 
 class Musica(commands.Cog):
+    
     """
     Classe de cogs para exportar hybrid commands
     da categoria de comandos 'Musica e trilha sonora'
@@ -190,7 +191,7 @@ class Musica(commands.Cog):
                 desc= descricao,
                 autor= mensagem,
                 esconder= True
-            )
+                )
             return
 
         mudar_apelidos(arquiv)
@@ -200,7 +201,6 @@ class Musica(commands.Cog):
             f"\nApelido: {apelido}\n",
             f"Nome da música: {nomearq}"
             )
-
         await mandar_embed(
             contexto= ctx,
             autor= mensagem
@@ -310,14 +310,13 @@ class Musica(commands.Cog):
         local_mus = f"musicas/{nomemusica}"
 
         vc.play(
-            discord.FFmpegPCMAudio(
-                source = local_mus),
-                after = lambda e: repetir(vc=vc, ctx=ctx)
+            discord.FFmpegPCMAudio(source= local_mus),
+            after= lambda e: repetir(vc=vc, ctx=ctx)
             )
         vc.source = discord.PCMVolumeTransformer(
-            vc.source,
-            volume=1.0
-            )
+                vc.source,
+                volume=1.0
+                )
 
     @commands.hybrid_command(
         name= "ptrilha",
@@ -402,6 +401,7 @@ class Musica(commands.Cog):
         description= "Deleta uma trilha criada!"
         )
     async def deltrilha(self, ctx, *, apelido: str):
+        
         """
         Deleta o arquivo.mp3 e os dados gravados no apelidos.yaml
         sobre uma trilha sonora criada com o comando /criartrilha
