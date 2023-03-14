@@ -18,7 +18,7 @@ from modulos.funcoes import mandar_embed
 
 
 class RolarDados(commands.Cog):
-    
+
     """
     Classe de cogs para exportar hybrid commands
     da categoria de comandos 'Rolagem de dados'
@@ -38,7 +38,7 @@ class RolarDados(commands.Cog):
         description= "Rola UM dado de sua escolha!"
         )
     async def rolarum(self, ctx, *, quant: int, lados: int):
-        
+
         """
         hybrid command, rola um dado a partir da
         quantidade de dados e de quantos lados o dado tem
@@ -80,7 +80,7 @@ class RolarDados(commands.Cog):
         description= "Rola dados! (Ex: 1d8+3d6+2d12+20)"
         )
     async def rolar(self, ctx, *, dado: str):
-        
+
         """
         hybrid command, faz a rolagem de multiplos dados a
         partir da string passada Ex: '2d6+3d8+5'
@@ -98,7 +98,7 @@ class RolarDados(commands.Cog):
             descricao = "Exemplos: 2d20+3d12 / 3d100 / 1d10+5"
             await mandar_embed(
                 contexto= ctx,
-                autor= mensagem[0],
+                autor= mensagem,
                 desc= descricao,
                 esconder= True
                 )
@@ -131,14 +131,12 @@ class RolarDados(commands.Cog):
         verificar_tipos_dados = len(dados_invalidos) == 0
 
         if not verificar_tipos_dados:
-            mensagem = (
-                "Um dos dados que você digitou não existe!",
-                "dados existentes: (4, 6, 8, 10, 12, 20, 100)"
-                )
+            mensagem = "Um dos dados que você digitou não existe!"
+            descricao = "dados existentes: (4, 6, 8, 10, 12, 20, 100)"
             await mandar_embed(
                 contexto= ctx,
-                autor= mensagem[0],
-                desc= mensagem[1],
+                autor= mensagem,
+                desc= descricao,
                 esconder= True
                 )
             return
@@ -240,11 +238,10 @@ class RolarDados(commands.Cog):
             )
 
         for loop_rolagem in range(0, vezes):
+            
             mensagem = f"{loop_rolagem+1}º:"
-            sub_mensagem = (
-                f"{dados[loop_rolagem]}",
-                f"\nSoma: {lista_somas[d]+soma}"
-                )
+            sub_mensagem = f"{dados[loop_rolagem]}"\
+                f"\nSoma: {lista_somas[loop_rolagem]+soma}"
 
             embed.add_field(
                 name= mensagem,
@@ -268,16 +265,14 @@ class RolarDados(commands.Cog):
         """
 
         tipos = [
-            "d4", "d6", "d8", 
-            "d10", "d12", "d20", 
+            "d4", "d6", "d8",
+            "d10", "d12", "d20",
             'd100'
             ]
         sort = choice(tipos)
 
-        mensagem = (
-            f"{ctx.author.name},",
+        mensagem = f"{ctx.author.name},"\
             f" o tipo de dado sorteado foi: {sort}"
-            )
         await mandar_embed(
             contexto= ctx,
             autor= mensagem

@@ -14,7 +14,7 @@ intents.message_content=True
 intents.members=True
 intents.voice_states=True
 
-def pegar_prefixo_server(message):
+def pegar_prefixo_server(bot, message):
 
     """
     Acha o prefixo que o server em específico usa

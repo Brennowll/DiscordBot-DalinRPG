@@ -10,14 +10,13 @@ Contém:
         'Musica' no arquivo Main.py
 """
 
+
 from os import remove
 from discord.ext import commands
 import yaml
 import discord
 from modulos.funcoes import mandar_embed
 
-# Especificar o erro dos excepts
-# Testar vc: player sem o player
 
 lista_volume = {}
 queue = {}
@@ -175,16 +174,12 @@ class Musica(commands.Cog):
         chegou_limite_mus = len(arquiv[id_autor_message]) >= 11
         if chegou_limite_mus:
 
-            mensagem = (
-                f"Eeeepa {ctx.author.name}, ",
-                "você já cadastrou 10 trilhas sonoras, ",
+            mensagem = f"Eeeepa {ctx.author.name},"\
+                "você já cadastrou 10 trilhas sonoras,"\
                 "esse é o máximo!"
-                )
-            descricao = (
-                "Da uma olhadinha nesses comandos aqui:",
-                "\n/listatrilhas /deltrilha /deltodas",
+            descricao = "Da uma olhadinha nesses comandos aqui:"\
+                "\n/listatrilhas /deltrilha /deltodas"\
                 "\n(Pra você liberar espaço :p )"
-                )
 
             await mandar_embed(
                 contexto= ctx,
@@ -196,14 +191,12 @@ class Musica(commands.Cog):
 
         mudar_apelidos(arquiv)
 
-        mensagem = (
-            f"{ctx.author.name} criou uma trilha sonora!",
-            f"\nApelido: {apelido}\n",
+        mensagem = f"{ctx.author.name} criou uma trilha sonora!" \
+            f"\nApelido: {apelido}\n" \
             f"Nome da música: {nomearq}"
-            )
         await mandar_embed(
             contexto= ctx,
-            autor= mensagem
+            autor= mensagem[:]
             )
 
         for arquivo_mp3 in ctx.message.attachments:
@@ -226,17 +219,12 @@ class Musica(commands.Cog):
 
         try:
             voice_channel = ctx.author.voice.channel
-
-        # Fazer um teste de que erro
-        # aparece pra poder especificar o except
-        except:
+        except AttributeError:
             voice_channel = None
 
         if voice_channel is None:
-            mensagem = (
-                "Você precisa entrar em ",
+            mensagem = "Você precisa entrar em "\
                 "um canal de voz primeiro"
-                )
             await mandar_embed(
                 contexto= ctx,
                 autor= mensagem,
@@ -249,19 +237,13 @@ class Musica(commands.Cog):
 
         try:
             id_existe = arquiv[id_autor_message]
-
-        # Especificar o except
-        except:
+        except KeyError:
             id_existe = None
 
         if id_existe is None:
-            mensagem = (
-                "Você ainda não cadastrou nenhuma trilha sonora",
-                )
-            descricao = (
-                "[tente o comando novamente ou crie uma ",
+            mensagem = "Você ainda não cadastrou nenhuma trilha sonora"
+            descricao = "[tente o comando novamente ou crie uma "\
                 "trilha sonora com o comando /criartrilha]"
-                )
             await mandar_embed(
                 contexto= ctx,
                 desc= descricao,
@@ -274,10 +256,8 @@ class Musica(commands.Cog):
         if apelido_n_existe:
 
             mensagem = "O apelido digitado não existe!"
-            descricao = (
-                "[tente o comando novamente ou use ",
+            descricao = "[tente o comando novamente ou use "\
                 "/criartrilha /listatrilhas]"
-                )
 
             await mandar_embed(
                 contexto= ctx,
@@ -368,9 +348,7 @@ class Musica(commands.Cog):
 
         try:
             id_existe = arquiv[id_autor_message]
-
-        # Especificar except
-        except:
+        except KeyError:
             id_existe = None
 
         if id_existe is None:
@@ -415,20 +393,16 @@ class Musica(commands.Cog):
         try:
             sem_dados = None
             nome_musica = arquiv[str(ctx.author.id)][apelido]
-
-        # Especificar except
-        except:
+        except KeyError:
             sem_dados = True
 
         if sem_dados is True:
-            descricao = (
-                "(Tente esses comandos: ",
+            
+            descricao = "(Tente esses comandos: "\
                 "/listatrilha /criartrilha)"
-                )
-            mensagem = (
-                "ish.. parece que essa trilha não existe ",
+            mensagem = "ish.. parece que essa trilha não existe "\
                 "ou você não cadastrou nenhuma trilha"
-                )
+                
             await mandar_embed(
                 contexto= ctx,
                 desc= descricao,
@@ -443,7 +417,7 @@ class Musica(commands.Cog):
 
         mudar_apelidos(arquiv)
 
-        mensagem = f"{ctx.author.name} deletou a trilha {apelido}!"
+        mensagem = f"{ctx.author.name} deletou a trilha '{apelido}'!"
         await mandar_embed(
             contexto= ctx,
             desc= f"({musicdel})",
@@ -464,13 +438,9 @@ class Musica(commands.Cog):
         id_autor_n_cadastrado = str(ctx.author.id) not in arquiv
         if id_autor_n_cadastrado:
 
-            descricao = (
-                "(Tente esses comandos: /listatrilha /criartrilha)",
-                )
-            mensagem = (
-                "Oops.. Você não tem nenhuma trilha criada :/"
-                )
-
+            descricao = "(Tente esses comandos: /listatrilha /criartrilha)"
+            mensagem = "Oops.. Você não tem nenhuma trilha criada :/"
+                
             await mandar_embed(
                 contexto= ctx,
                 desc= descricao,
@@ -512,17 +482,15 @@ class Musica(commands.Cog):
 
         try:
             voice_channel = ctx.author.voice.channel
-        except:
+        except AttributeError:
             voice_channel = None
 
         autor_n_conectado = voice_channel is None
         n_tocando_server = id_guilda not in tocando
 
         if autor_n_conectado or n_tocando_server:
-            mensagem = (
-                "Você precisa entrar em um canal de voz ",
+            mensagem = "Você precisa entrar em um canal de voz "\
                 "que esteja tocando uma trilha sonora primeiro"
-                )
             await mandar_embed(
                 contexto= ctx,
                 autor= mensagem,
@@ -540,7 +508,8 @@ class Musica(commands.Cog):
                 )
             return
 
-        vc: player = ctx.voice_client
+        # vc: player = ctx.voice_client
+        vc = ctx.voice_client
 
         novovol = volume / 100
         lista_volume[f"{ctx.author.id}"] = novovol
