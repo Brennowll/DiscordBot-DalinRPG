@@ -68,7 +68,7 @@
 
 
 
-### Built With
+### Feito com
 
 - <a href="https://www.python.org/">Python 3.x</a>
 - <a href="https://discordpy.readthedocs.io/en/v2.1.0/">Discord.py[voice] 2.1.0</a>
@@ -135,7 +135,7 @@ Veja as [open issues](https://github.com/Brennowll/DiscordBot-DalinRPG/issues) p
 
 
 <!-- CONTRIBUTING -->
-## Contributing
+## Contribuindo
 
 As contribuições são o que torna a comunidade de código aberto um lugar incrível para aprender, inspirar e criar. Quaisquer contribuições que você fizer são **muito apreciadas**.
 
